@@ -13,6 +13,8 @@ class HealthSpikeTheme {
   static const Color grey = Color(0xFF3A5160);
   static const Color darkGrey = Color(0xFF313A44);
 
+  static const Color mainGreen = Color(0xFF94D242); 
+
   static const Color darkText = Color(0xFF253840);
   static const Color darkerText = Color(0xFF17262A);
   static const Color lightText = Color(0xFF4A6572);
@@ -24,13 +26,13 @@ class HealthSpikeTheme {
   static ThemeData get lightTheme { //1
 
     return ThemeData( //// 2
-        primaryColor: Colors.blueAccent,
+        primaryColor: mainGreen,
         brightness: Brightness.light,
         scaffoldBackgroundColor: nearlyWhite,
         fontFamily: fontName, //3
         buttonTheme: ButtonThemeData( // 4
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-          buttonColor: Colors.blue,
+          buttonColor: mainGreen,
         ),
     );
 

@@ -274,8 +274,8 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                               return CustomPaint(
                                 painter: CurvePainter(
                                     colors: [
-                                      const Color(0xFF94D242),
-                                      const Color(0xFF94D242)
+                                      HealthSpikeTheme.mainGreen,
+                                      HealthSpikeTheme.mainGreen
                                     ],
                                     angle:
                                         (pedometer.goalPercentage * 360 / 100)),
@@ -308,24 +308,34 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
               padding: const EdgeInsets.only(left: 24, right: 24),
               child: Row(
                 children: <Widget>[
-                  Container(
-                      margin: const EdgeInsets.only(top: 12),
-                      child: Image.asset(
-                        "assets/images/walking.png",
-                        height: 40,
-                        width: 40,
-                      )),
-                  Container(margin: const EdgeInsets.only(left: 20, top: 10), child: const Text(
-                    'Keep up!',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontFamily: HealthSpikeTheme.fontName,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                      letterSpacing: 0.5,
-                      color: HealthSpikeTheme.lightText,
-                    ),
-                  )),
+                  Consumer<PedometerModel>(
+                      builder: (context, pedometer, child) {
+                    return Container(
+                        margin: const EdgeInsets.only(top: 12),
+                        child: Image.asset(
+                          pedometer.isPedestrianWalking()
+                              ? 'assets/images/walking.png'
+                              : 'assets/images/stopped.png',
+                          height: 40,
+                          width: 40,
+                        ));
+                  }),
+                  Consumer<PedometerModel>(
+                      builder: (context, pedometer, child) {
+                    return Container(
+                        margin: const EdgeInsets.only(left: 20, top: 10),
+                        child: Text(
+                          pedometer.isPedestrianWalking() ? 'Keep up!' : 'Try to walk for a bit...',
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontFamily: HealthSpikeTheme.fontName,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            letterSpacing: 0.5,
+                            color: HealthSpikeTheme.lightText,
+                          ),
+                        ));
+                  }),
                 ],
               ),
             )

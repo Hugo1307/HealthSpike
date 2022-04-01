@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/dashboard/horizontal_list_view.dart';
 
 import 'main_panel.dart';
 
@@ -13,7 +14,8 @@ class DashboardBody extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: const [
-        OverviewPanelView()
+        OverviewPanelView(),
+        WeatherListView()
       ],
     );
   }

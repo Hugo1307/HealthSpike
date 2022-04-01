@@ -43,6 +43,11 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
       Provider.of<PedometerModel>(context, listen: false).setStepsCount(event.stepsCount);
     });
 
+    eventBus.on<PedestrianStatusUpdatedEvent>().listen((event) {
+      // All events are of type UserLoggedInEvent (or subtypes of it).
+      Provider.of<PedometerModel>(context, listen: false).setPedestrianState(event.pedestrianStatus);
+    });
+
   }
 
   void refreshChild(childIndex) {
@@ -77,9 +82,9 @@ class TopBar extends AppBar {
           elevation: 0,
           actions: [
             Container(
-                margin: const EdgeInsets.only(top: 25, left: 13),
+                margin: const EdgeInsets.only(top: 32, left: 13),
                 child: Image.asset('assets/images/large_healthspike.png',
-                    width: 125, fit: BoxFit.cover)),
+                    width: 140, fit: BoxFit.cover)),
             const Spacer(),
           ],
         );
@@ -169,7 +174,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 ),
               ],
               currentIndex: _selectedIndex,
-              selectedItemColor: const Color.fromARGB(255, 0, 82, 254),
+              selectedItemColor: HealthSpikeTheme.mainGreen,
               onTap: _onItemTapped,
             )));
   }

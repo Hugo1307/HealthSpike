@@ -14,18 +14,21 @@ class AppPedometerSensor {
   String _status = '?';
 
   void onStepCount(StepCount event) {
+
     if (kDebugMode) {
       print(event);
     }
 
-    eventBus.fire(StepsUpdatedEvent(event.steps));
+    eventBus.fire(StepsUpdatedEvent(event.steps, event.timeStamp));
   }
 
   void onPedestrianStatusChanged(PedestrianStatus event) {
+
     if (kDebugMode) {
       print(event);
     }
-    eventBus.fire(PedestrianStatusUpdatedEvent(event.status));
+    eventBus.fire(PedestrianStatusUpdatedEvent(event.status, event.timeStamp));
+    
   }
 
   void onPedestrianStatusError(error) {

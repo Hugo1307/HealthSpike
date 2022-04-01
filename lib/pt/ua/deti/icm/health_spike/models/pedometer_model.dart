@@ -4,6 +4,7 @@ class PedometerModel extends ChangeNotifier {
 
   int _dailyGoal = 200;
   int _stepCount = 0;
+  String _pedestrianState = "";
   double _goalPercentage = 0;
 
   void setDailyStepsGoal(int newStepsGoal) {
@@ -16,6 +17,12 @@ class PedometerModel extends ChangeNotifier {
   void setStepsCount(int newStepsCount) {
     _stepCount = newStepsCount;
     _updateGoalPercentage();
+
+    notifyListeners();
+  }
+
+  void setPedestrianState(String pedestrianState) {
+    _pedestrianState = pedestrianState;
 
     notifyListeners();
   }
@@ -36,6 +43,10 @@ class PedometerModel extends ChangeNotifier {
 
   double get goalPercentage {
     return _goalPercentage;
+  }
+
+  bool isPedestrianWalking() {
+    return _pedestrianState == "walking";
   }
 
 }

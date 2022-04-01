@@ -3,15 +3,15 @@ class StepsUpdatedEvent {
   DateTime timestamp;
   int stepsCount;
   
-  StepsUpdatedEvent(this.stepsCount);
+  StepsUpdatedEvent(this.stepsCount, this.timestamp);
 
 }
 
 class PedestrianStatusUpdatedEvent {
 
   DateTime timestamp;
-  String newStatus;
+  String pedestrianStatus;
 
-  PedestrianStatusUpdatedEvent(this.newStatus);
+  PedestrianStatusUpdatedEvent(this.pedestrianStatus, this.timestamp);
 
 }
