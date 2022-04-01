@@ -1,36 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/events/pedometer_events.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/models/pedometer_model.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
-
-import '../main.dart';
 
 class OverviewPanelView extends StatefulWidget {
   const OverviewPanelView({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _OverviewPanelViewState();
-
 }
 
 class _OverviewPanelViewState extends State<OverviewPanelView> {
-  int _stepCount = 0;
-  int _dailyGoal = 200;
-  double _completedPercentage = 0;
-
-  @override
-  void initState() {
-    super.initState();
-
-    eventBus.on<StepsUpdatedEvent>().listen((event) {
-      // All events are of type UserLoggedInEvent (or subtypes of it).
-      setState(() {
-        _stepCount = event.stepsCount;
-        _completedPercentage = _stepCount / _dailyGoal * 100;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -111,18 +92,22 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                         Padding(
                                           padding: const EdgeInsets.only(
                                               left: 4, bottom: 3),
-                                          child: Text(
-                                            '$_stepCount',
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontFamily:
-                                                  HealthSpikeTheme.fontName,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 16,
-                                              color:
-                                                  HealthSpikeTheme.darkerText,
-                                            ),
-                                          ),
+                                          child: Consumer<PedometerModel>(
+                                              builder:
+                                                  (context, pedometer, child) {
+                                            return Text(
+                                              '${pedometer.stepCount}',
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                fontFamily:
+                                                    HealthSpikeTheme.fontName,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                                color:
+                                                    HealthSpikeTheme.darkerText,
+                                              ),
+                                            );
+                                          }),
                                         ),
                                       ],
                                     )
@@ -249,45 +234,57 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: <Widget>[
-                                  Text(
-                                    '${(_dailyGoal - _stepCount).toInt()}',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontFamily: HealthSpikeTheme.fontName,
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 24,
-                                      letterSpacing: 0.0,
-                                      color: HealthSpikeTheme.darkGrey,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Steps left',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontFamily: HealthSpikeTheme.fontName,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      letterSpacing: 0.0,
-                                      color: HealthSpikeTheme.grey
-                                          .withOpacity(0.5),
-                                    ),
-                                  ),
+                                  Consumer<PedometerModel>(
+                                      builder: (context, pedometer, child) {
+                                    return Text(
+                                      '${(pedometer.dailyGoal > pedometer.stepCount ? pedometer.dailyGoal - pedometer.stepCount : pedometer.stepCount).toInt()}',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontFamily: HealthSpikeTheme.fontName,
+                                        fontWeight: FontWeight.normal,
+                                        fontSize: 24,
+                                        letterSpacing: 0.0,
+                                        color: HealthSpikeTheme.darkGrey,
+                                      ),
+                                    );
+                                  }),
+                                  Consumer<PedometerModel>(
+                                      builder: (context, pedometer, child) {
+                                    return Text(
+                                      'Steps ${pedometer.dailyGoal > pedometer.stepCount ? 'left' : ''}',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontFamily: HealthSpikeTheme.fontName,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        letterSpacing: 0.0,
+                                        color: HealthSpikeTheme.grey
+                                            .withOpacity(0.5),
+                                      ),
+                                    );
+                                  }),
                                 ],
                               ),
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: CustomPaint(
-                              painter: CurvePainter(colors: [
-                                const Color(0xFF94D242),
-                                const Color(0xFF94D242)
-                              ], angle: (_completedPercentage * 360 / 100)),
-                              child: const SizedBox(
-                                width: 108,
-                                height: 108,
-                              ),
-                            ),
+                            child: Consumer<PedometerModel>(
+                                builder: (context, pedometer, child) {
+                              return CustomPaint(
+                                painter: CurvePainter(
+                                    colors: [
+                                      const Color(0xFF94D242),
+                                      const Color(0xFF94D242)
+                                    ],
+                                    angle:
+                                        (pedometer.goalPercentage * 360 / 100)),
+                                child: const SizedBox(
+                                  width: 108,
+                                  height: 108,
+                                ),
+                              );
+                            }),
                           )
                         ],
                       ),
@@ -296,6 +293,42 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                 ],
               ),
             ),
+            Padding(
+              padding:
+                  const EdgeInsets.only(left: 24, right: 24, top: 8, bottom: 8),
+              child: Container(
+                height: 2,
+                decoration: const BoxDecoration(
+                  color: HealthSpikeTheme.background,
+                  borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 24, right: 24),
+              child: Row(
+                children: <Widget>[
+                  Container(
+                      margin: const EdgeInsets.only(top: 12),
+                      child: Image.asset(
+                        "assets/images/walking.png",
+                        height: 40,
+                        width: 40,
+                      )),
+                  Container(margin: const EdgeInsets.only(left: 20, top: 10), child: const Text(
+                    'Keep up!',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontFamily: HealthSpikeTheme.fontName,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      letterSpacing: 0.5,
+                      color: HealthSpikeTheme.lightText,
+                    ),
+                  )),
+                ],
+              ),
+            )
           ],
         ),
       ),

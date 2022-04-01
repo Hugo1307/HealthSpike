@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/events/pedometer_events.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/models/pedometer_model.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 import '../main.dart';
 
@@ -15,6 +17,7 @@ class AppPedometerSensor {
     if (kDebugMode) {
       print(event);
     }
+
     eventBus.fire(StepsUpdatedEvent(event.steps));
   }
 
@@ -34,8 +37,6 @@ class AppPedometerSensor {
   }
 
   void initPlatformState() {
-    Permission.activityRecognition.isGranted
-        .then((b) => print('Hey ' + b.toString()));
 
     _pedestrianStatusStream = Pedometer.pedestrianStatusStream;
     _pedestrianStatusStream
