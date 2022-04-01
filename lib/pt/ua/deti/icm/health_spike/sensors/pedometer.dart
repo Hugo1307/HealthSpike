@@ -25,6 +25,7 @@ class AppPedometerSensor {
     if (kDebugMode) {
       print(event);
     }
+    eventBus.fire(PedestrianStatusUpdatedEvent(event.status));
   }
 
   void onPedestrianStatusError(error) {
