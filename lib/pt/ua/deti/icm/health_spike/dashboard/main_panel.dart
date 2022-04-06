@@ -142,20 +142,18 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                     Padding(
                                       padding: const EdgeInsets.only(
                                           left: 4, bottom: 2),
-                                      child: Consumer<LocationModel>(
-                                          builder: (context, location, child) {
-                                        return Text(
-                                          '${location.distance}',
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                            fontFamily:
-                                                HealthSpikeTheme.fontName,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                            color: HealthSpikeTheme.darkerText,
-                                          ),
-                                        );
-                                      }),
+                                      child: Text(
+                                        'Distance',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontFamily: HealthSpikeTheme.fontName,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 16,
+                                          letterSpacing: -0.1,
+                                          color: HealthSpikeTheme.grey
+                                              .withOpacity(0.5),
+                                        ),
+                                      ),
                                     ),
                                     Row(
                                       mainAxisAlignment:
@@ -172,18 +170,26 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                         Padding(
                                           padding: const EdgeInsets.only(
                                               left: 4, bottom: 3),
-                                          child: Text(
-                                            '${(102 * 9).toInt()}',
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontFamily:
-                                                  HealthSpikeTheme.fontName,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 16,
-                                              color:
-                                                  HealthSpikeTheme.darkerText,
-                                            ),
-                                          ),
+                                          child: Consumer<LocationModel>(
+                                              builder:
+                                                  (context, location, child) {
+                                            return Text(
+                                              location.currentLocation != null
+                                                  ? location
+                                                      .currentLocation!.latitude
+                                                      .toString()
+                                                  : 'Loading...',
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                fontFamily:
+                                                    HealthSpikeTheme.fontName,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                                color:
+                                                    HealthSpikeTheme.darkerText,
+                                              ),
+                                            );
+                                          }),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.only(

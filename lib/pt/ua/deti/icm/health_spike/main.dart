@@ -9,6 +9,7 @@ import 'package:health_spike/pt/ua/deti/icm/health_spike/events/heart_rate_chang
 import 'package:health_spike/pt/ua/deti/icm/health_spike/hooks/queue/rabbit_mq_handler.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/models/heart_rate_model.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/models/pedometer_model.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/sensors/location.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/sensors/pedometer.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/utils/app_page.dart';
@@ -55,11 +56,12 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
           .setPedestrianState(event.pedestrianStatus);
     });
 
-    eventBus.on<DistanceUpdatedEvent>().listen((event) {
+    eventBus.on<LocationChangedEvent>().listen((event) {
       // All events are of type UserLoggedInEvent (or subtypes of it).
       Provider.of<LocationModel>(context, listen: false)
-          .setDistance(event.distance);
+          .setCurrentLocation(event.location);
     });
+
     rabbitMQHandler
         .consumeMessage()
         ?.then((consumer) => consumer.listen((AmqpMessage message) {
@@ -210,7 +212,8 @@ void main() async {
   runApp(MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => PedometerModel()),
-        ChangeNotifierProvider(create: (context) => HeartRateModel())
+        ChangeNotifierProvider(create: (context) => HeartRateModel()),
+        ChangeNotifierProvider(create: (context) => LocationModel())
       ],
       child: MaterialApp(
         theme: HealthSpikeTheme.lightTheme,
@@ -218,6 +221,8 @@ void main() async {
       )));
 
   AppPedometerSensor().initPlatformState();
+
+  AppLocationSensor().initPlatformState();
 
   if (kDebugMode) {
     PermissionHandler().printPermissionCheck();

@@ -4,10 +4,12 @@ import 'package:health_spike/pt/ua/deti/icm/health_spike/main.dart';
 import 'package:location/location.dart';
 
 class AppLocationSensor {
-  late Stream<LocationData> _locationDataStream;
+  Location location = Location();
+
+  LocationData? _currentLocation;
   String _distance = '?', _status = '?';
 
-  void onDistanceCount(Location loc) {
+  void onDistanceChanged(Location loc) {
     LocationData locationaData = loc.getLocation() as LocationData;
     double? _distanceDouble = locationaData.latitude?.toDouble();
     if (_distanceDouble != null) {
@@ -22,11 +24,8 @@ class AppLocationSensor {
   }
 
   Future<void> initPlatformState() async {
-    Location location = new Location();
-
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
-    LocationData _locationData;
 
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
@@ -44,8 +43,12 @@ class AppLocationSensor {
       }
     }
 
-    _locationData = await location.getLocation();
+    location.onLocationChanged.listen((LocationData currentSensorLocation) {
+      print('Location Changed');
+      _currentLocation = currentSensorLocation;
+      eventBus.fire(LocationChangedEvent(_currentLocation!));
+    });
 
-    _distance = _locationData.latitude.toString();
+    // _distance = _currentLocation!.latitude.toString();
   }
 }

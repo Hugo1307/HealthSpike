@@ -1,3 +1,5 @@
+import 'package:location/location.dart';
+
 class DistanceUpdatedEvent {
   DateTime timestamp;
   double distance;
@@ -10,4 +12,10 @@ class LocationStatusUpdatedEvent {
   String locationStatus;
 
   LocationStatusUpdatedEvent(this.locationStatus, this.timestamp);
+}
+
+class LocationChangedEvent {
+  final LocationData location;
+
+  LocationChangedEvent(this.location);
 }
