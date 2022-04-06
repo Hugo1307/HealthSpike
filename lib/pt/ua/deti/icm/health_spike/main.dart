@@ -1,9 +1,13 @@
+import 'package:dart_amqp/dart_amqp.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/events/location_events.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/models/location_model.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/events/heart_rate_changed.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/hooks/queue/rabbit_mq_handler.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/models/heart_rate_model.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/models/pedometer_model.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/sensors/pedometer.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
@@ -16,6 +20,7 @@ import 'dashboard/dashboard.dart';
 import 'events/pedometer_events.dart';
 
 final EventBus eventBus = EventBus();
+late RabbitMQHandler rabbitMQHandler;
 
 class HealthSpikeAppContainer extends StatefulWidget {
   const HealthSpikeAppContainer({Key? key}) : super(key: key);
@@ -55,6 +60,16 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
       Provider.of<LocationModel>(context, listen: false)
           .setDistance(event.distance);
     });
+    rabbitMQHandler
+        .consumeMessage()
+        ?.then((consumer) => consumer.listen((AmqpMessage message) {
+              HeartRateChangedEvent heartRateChangedEvent =
+                  HeartRateChangedEvent.fromJson(message.payloadAsJson);
+
+              Provider.of<HeartRateModel>(context, listen: false)
+                  .setCurrentHeartRate(
+                      heartRateChangedEvent.heartRate, DateTime.now());
+            }));
   }
 
   void refreshChild(childIndex) {
@@ -186,12 +201,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
   }
 }
 
-void main() {
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+void main() async {
+  // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+
+  rabbitMQHandler = RabbitMQHandler("139.59.174.157", "guest", "guest");
+  await rabbitMQHandler.connect();
 
   runApp(MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => PedometerModel())
+        ChangeNotifierProvider(create: (context) => PedometerModel()),
+        ChangeNotifierProvider(create: (context) => HeartRateModel())
       ],
       child: MaterialApp(
         theme: HealthSpikeTheme.lightTheme,
