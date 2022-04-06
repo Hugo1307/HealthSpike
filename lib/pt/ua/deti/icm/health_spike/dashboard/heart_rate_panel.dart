@@ -173,20 +173,20 @@ class _HeartRateViewState extends State<HeartRateView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         const Text(
-                          '185 cm',
+                          '120 bpm',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: HealthSpikeTheme.fontName,
                             fontWeight: FontWeight.w500,
-                            fontSize: 16,
+                            fontSize: 15,
                             letterSpacing: -0.2,
-                            color: HealthSpikeTheme.darkText,
+                            color: HealthSpikeTheme.redWhitened,
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 6),
                           child: Text(
-                            'Height',
+                            'Max',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: HealthSpikeTheme.fontName,
@@ -209,20 +209,20 @@ class _HeartRateViewState extends State<HeartRateView> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             const Text(
-                              '27.3 BMI',
+                              '60 bpm',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: HealthSpikeTheme.fontName,
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: 15,
                                 letterSpacing: -0.2,
-                                color: HealthSpikeTheme.darkText,
+                                color: HealthSpikeTheme.redWhitened,
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 6),
                               child: Text(
-                                'Overweight',
+                                'Min',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: HealthSpikeTheme.fontName,
@@ -247,19 +247,19 @@ class _HeartRateViewState extends State<HeartRateView> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: <Widget>[
                             const Text(
-                              '20%',
+                              '85 bpm',
                               style: TextStyle(
                                 fontFamily: HealthSpikeTheme.fontName,
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: 15,
                                 letterSpacing: -0.2,
-                                color: HealthSpikeTheme.darkText,
+                                color: HealthSpikeTheme.redWhitened,
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 6),
                               child: Text(
-                                'Body fat',
+                                'Average',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: HealthSpikeTheme.fontName,
