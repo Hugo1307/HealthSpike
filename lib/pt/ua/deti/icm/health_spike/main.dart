@@ -2,6 +2,9 @@ import 'package:dart_amqp/dart_amqp.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/events/location_events.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/models/location_model.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/events/heart_rate_changed.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/hooks/queue/rabbit_mq_handler.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/models/heart_rate_model.dart';
@@ -10,6 +13,7 @@ import 'package:health_spike/pt/ua/deti/icm/health_spike/sensors/pedometer.dart'
 import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/utils/app_page.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/utils/permissions.dart';
+import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
 import 'dashboard/dashboard.dart';
@@ -51,6 +55,11 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
           .setPedestrianState(event.pedestrianStatus);
     });
 
+    eventBus.on<DistanceUpdatedEvent>().listen((event) {
+      // All events are of type UserLoggedInEvent (or subtypes of it).
+      Provider.of<LocationModel>(context, listen: false)
+          .setDistance(event.distance);
+    });
     rabbitMQHandler
         .consumeMessage()
         ?.then((consumer) => consumer.listen((AmqpMessage message) {

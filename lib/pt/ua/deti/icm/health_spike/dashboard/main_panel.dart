@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/models/location_model.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/models/pedometer_model.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
+import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
 
@@ -140,18 +142,20 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                     Padding(
                                       padding: const EdgeInsets.only(
                                           left: 4, bottom: 2),
-                                      child: Text(
-                                        'Distance',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: HealthSpikeTheme.fontName,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16,
-                                          letterSpacing: -0.1,
-                                          color: HealthSpikeTheme.grey
-                                              .withOpacity(0.5),
-                                        ),
-                                      ),
+                                      child: Consumer<LocationModel>(
+                                          builder: (context, location, child) {
+                                        return Text(
+                                          '${location.distance}',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontFamily:
+                                                HealthSpikeTheme.fontName,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                            color: HealthSpikeTheme.darkerText,
+                                          ),
+                                        );
+                                      }),
                                     ),
                                     Row(
                                       mainAxisAlignment:
@@ -325,7 +329,9 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                     return Container(
                         margin: const EdgeInsets.only(left: 20, top: 10),
                         child: Text(
-                          pedometer.isPedestrianWalking() ? 'Keep up!' : 'Try to walk for a bit...',
+                          pedometer.isPedestrianWalking()
+                              ? 'Keep up!'
+                              : 'Try to walk for a bit...',
                           textAlign: TextAlign.left,
                           style: const TextStyle(
                             fontFamily: HealthSpikeTheme.fontName,
