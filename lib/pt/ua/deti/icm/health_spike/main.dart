@@ -1,7 +1,10 @@
+import 'package:dart_amqp/dart_amqp.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/events/heart_rate_changed.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/hooks/queue/rabbit_mq_handler.dart';
+import 'package:health_spike/pt/ua/deti/icm/health_spike/models/heart_rate_model.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/models/pedometer_model.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/sensors/pedometer.dart';
 import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
@@ -13,6 +16,7 @@ import 'dashboard/dashboard.dart';
 import 'events/pedometer_events.dart';
 
 final EventBus eventBus = EventBus();
+late RabbitMQHandler rabbitMQHandler;
 
 class HealthSpikeAppContainer extends StatefulWidget {
   const HealthSpikeAppContainer({Key? key}) : super(key: key);
@@ -22,7 +26,6 @@ class HealthSpikeAppContainer extends StatefulWidget {
 }
 
 class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
-  
   int _selectedItemIndex = 0;
 
   static final List<AppPage> _listOfPages = [
@@ -32,22 +35,32 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
     AppPage(3, 'Pay', const Text('"Pay" is working!'))
   ];
 
-
   @override
   void initState() {
-    
     super.initState();
 
     eventBus.on<StepsUpdatedEvent>().listen((event) {
       // All events are of type UserLoggedInEvent (or subtypes of it).
-      Provider.of<PedometerModel>(context, listen: false).setStepsCount(event.stepsCount);
+      Provider.of<PedometerModel>(context, listen: false)
+          .setStepsCount(event.stepsCount);
     });
 
     eventBus.on<PedestrianStatusUpdatedEvent>().listen((event) {
       // All events are of type UserLoggedInEvent (or subtypes of it).
-      Provider.of<PedometerModel>(context, listen: false).setPedestrianState(event.pedestrianStatus);
+      Provider.of<PedometerModel>(context, listen: false)
+          .setPedestrianState(event.pedestrianStatus);
     });
 
+    rabbitMQHandler
+        .consumeMessage()
+        ?.then((consumer) => consumer.listen((AmqpMessage message) {
+              HeartRateChangedEvent heartRateChangedEvent =
+                  HeartRateChangedEvent.fromJson(message.payloadAsJson);
+
+              Provider.of<HeartRateModel>(context, listen: false)
+                  .setCurrentHeartRate(
+                      heartRateChangedEvent.heartRate, DateTime.now());
+            }));
   }
 
   void refreshChild(childIndex) {
@@ -65,7 +78,6 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
       bottomNavigationBar: BottomNavBar(callbackOnUpdate: refreshChild),
     );
   }
-
 }
 
 class TopBar extends AppBar {
@@ -180,12 +192,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
   }
 }
 
-void main() {
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+void main() async {
+  // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+
+  rabbitMQHandler = RabbitMQHandler("139.59.174.157", "guest", "guest");
+  await rabbitMQHandler.connect();
 
   runApp(MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => PedometerModel())
+        ChangeNotifierProvider(create: (context) => PedometerModel()),
+        ChangeNotifierProvider(create: (context) => HeartRateModel())
       ],
       child: MaterialApp(
         theme: HealthSpikeTheme.lightTheme,
@@ -199,5 +215,4 @@ void main() {
   }
 
   PermissionHandler().checkMandatoryPermissions();
-
 }

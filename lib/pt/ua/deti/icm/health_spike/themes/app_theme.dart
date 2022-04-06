@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HealthSpikeTheme {
-
   static const Color nearlyWhite = Color(0xFFFAFAFA);
   static const Color white = Color(0xFFFFFFFF);
   static const Color background = Color(0xFFF2F3F8);
@@ -13,7 +12,10 @@ class HealthSpikeTheme {
   static const Color grey = Color(0xFF3A5160);
   static const Color darkGrey = Color(0xFF313A44);
 
-  static const Color mainGreen = Color(0xFF94D242); 
+  static const Color mainGreen = Color(0xFF94D242);
+
+  static const Color mainRed = Color(0xFFFD5D5D);
+  static const Color redWhitened = Color(0xFFFF8080);
 
   static const Color darkText = Color(0xFF253840);
   static const Color darkerText = Color(0xFF17262A);
@@ -23,19 +25,22 @@ class HealthSpikeTheme {
   static const Color spacer = Color(0xFFF2F2F2);
   static const String fontName = 'Roboto';
 
-  static ThemeData get lightTheme { //1
+  static ThemeData get lightTheme {
+    //1
 
-    return ThemeData( //// 2
-        primaryColor: mainGreen,
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: nearlyWhite,
-        fontFamily: fontName, //3
-        buttonTheme: ButtonThemeData( // 4
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-          buttonColor: mainGreen,
-        ),
+    return ThemeData(
+      //// 2
+      primaryColor: mainGreen,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: nearlyWhite,
+      fontFamily: fontName, //3
+      buttonTheme: ButtonThemeData(
+        // 4
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+        buttonColor: mainGreen,
+      ),
     );
-
   }
 
   static TextTheme textTheme = TextTheme(
@@ -57,13 +62,16 @@ class HealthSpikeTheme {
     color: darkerText,
   );
 
-  static TextStyle headline = GoogleFonts.roboto(fontWeight: FontWeight.w700, textStyle: const TextStyle(
-    fontSize: 22,
-    letterSpacing: 0.5,
-    color: darkerText,
-  ));
+  static TextStyle headline = GoogleFonts.roboto(
+      fontWeight: FontWeight.w700,
+      textStyle: const TextStyle(
+        fontSize: 22,
+        letterSpacing: 0.5,
+        color: darkerText,
+      ));
 
-  static TextStyle title = GoogleFonts.roboto(textStyle: const TextStyle(
+  static TextStyle title = GoogleFonts.roboto(
+      textStyle: const TextStyle(
     fontFamily: fontName,
     fontWeight: FontWeight.w500,
     fontSize: 18,
@@ -79,7 +87,8 @@ class HealthSpikeTheme {
     color: darkText,
   );
 
-  static TextStyle body2 = GoogleFonts.roboto(textStyle: const TextStyle(
+  static TextStyle body2 = GoogleFonts.roboto(
+      textStyle: const TextStyle(
     fontWeight: FontWeight.w400,
     fontSize: 14,
     letterSpacing: 0.2,
@@ -101,5 +110,4 @@ class HealthSpikeTheme {
     letterSpacing: 0.2,
     color: lightText, // was lightText
   );
-
 }
