@@ -2,20 +2,22 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
-//import 'package:permission_handler/permission_handler.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
+import 'package:health_spike/themes/app_theme.dart';
+import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class LocationMainWidget extends StatefulWidget {
-  const LocationMainWidget({Key? key}) : super(key: key);
+class PedometerMainWidget extends StatefulWidget {
+  const PedometerMainWidget({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _LocationMainWidgetState();
+  State<StatefulWidget> createState() => _PedometerMainWidgetState();
 }
 
-class _LocationMainWidgetState extends State<LocationMainWidget> {
-  late Stream<LocationData> _locationDataStream;
-  String _distance = '?', _status = '?';
+class _PedometerMainWidgetState extends State<PedometerMainWidget> {
+
+  late Stream<StepCount> _stepCountStream;
+  late Stream<PedestrianStatus> _pedestrianStatusStream;
+  String _status = '?', _steps = '?';
 
   @override
   void initState() {
@@ -23,49 +25,52 @@ class _LocationMainWidgetState extends State<LocationMainWidget> {
     initPlatformState();
   }
 
-  void onDistanceCount(Location event) {
+  void onStepCount(StepCount event) {
     if (kDebugMode) {
       print(event);
     }
 
     setState(() {
-      _distance = event.getLocation().toString();
+      _steps = event.steps.toString();
     });
   }
 
-  void onDistanceCountError() {
-    print('onDistanceCountError');
+  void onPedestrianStatusChanged(PedestrianStatus event) {
+    if (kDebugMode) {
+      print(event);
+    }
+
     setState(() {
-      _distance = 'Distance Count not available';
+      _status = event.status;
     });
   }
 
-  Future<void> initPlatformState() async {
-    Location location = new Location();
+  void onPedestrianStatusError(error) {
+    print('onPedestrianStatusError: $error');
+    setState(() {
+      _status = 'Pedestrian Status not available';
+    });
+    print(_status);
+  }
 
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
+  void onStepCountError(error) {
+    print('onStepCountError: $error');
+    setState(() {
+      _steps = 'Step Count not available';
+    });
+  }
 
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
-    }
+  void initPlatformState() {
+    Permission.activityRecognition.isGranted
+        .then((b) => print('Hey ' + b.toString()));
 
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
+    _pedestrianStatusStream = Pedometer.pedestrianStatusStream;
+    _pedestrianStatusStream
+        .listen(onPedestrianStatusChanged)
+        .onError(onPedestrianStatusError);
 
-    _locationData = await location.getLocation();
-
-    _distance = _locationData.latitude.toString();
+    _stepCountStream = Pedometer.stepCountStream;
+    _stepCountStream.listen(onStepCount).onError(onStepCountError);
 
     if (!mounted) return;
   }
@@ -91,10 +96,7 @@ class _LocationMainWidgetState extends State<LocationMainWidget> {
                           height: 30,
                           width: 30,
                           child: Image.asset('assets/images/tab_2s.png')),
-                      Container(
-                          margin: const EdgeInsets.only(left: 5),
-                          child:
-                              Text('Distance', style: HealthSpikeTheme.title)),
+                      Container(margin: const EdgeInsets.only(left: 5), child: Text('Steps', style: HealthSpikeTheme.title)),
                     ],
                   ),
                 ),

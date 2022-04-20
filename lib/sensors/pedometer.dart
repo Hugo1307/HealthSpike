@@ -1,9 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/events/pedometer_events.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/models/pedometer_model.dart';
+import 'package:health_spike/events/pedometer_events.dart';
 import 'package:pedometer/pedometer.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 
 import '../main.dart';
 

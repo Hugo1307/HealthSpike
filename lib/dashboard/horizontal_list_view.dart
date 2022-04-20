@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/utils/weather_data.dart';
+import 'package:health_spike/themes/app_theme.dart';
+import 'package:health_spike/utils/weather_data.dart';
 import 'package:intl/intl.dart';
 
 class WeatherListView extends StatefulWidget {

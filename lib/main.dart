@@ -2,19 +2,23 @@ import 'package:dart_amqp/dart_amqp.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/events/location_events.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/models/location_model.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/events/heart_rate_changed.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/hooks/queue/rabbit_mq_handler.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/models/heart_rate_model.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/models/pedometer_model.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/sensors/location.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/sensors/pedometer.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/utils/app_page.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/utils/permissions.dart';
-import 'package:location/location.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:health_spike/events/heart_rate_changed.dart';
+import 'package:health_spike/events/location_events.dart';
+import 'package:health_spike/heart_page/main_heart_page.dart';
+import 'package:health_spike/heart_rate/bloc/heart_rate_bloc.dart';
+import 'package:health_spike/heart_rate/repository/heart_rate_repository.dart';
+import 'package:health_spike/heart_rate/bloc/heart_rate_events.dart';
+import 'package:health_spike/hooks/queue/rabbit_mq_handler.dart';
+import 'package:health_spike/models/heart_rate_model.dart';
+import 'package:health_spike/models/location_model.dart';
+import 'package:health_spike/models/pedometer_model.dart';
+import 'package:health_spike/objectbox/object_box_handler.dart';
+import 'package:health_spike/sensors/location.dart';
+import 'package:health_spike/sensors/pedometer.dart';
+import 'package:health_spike/themes/app_theme.dart';
+import 'package:health_spike/utils/app_page.dart';
+import 'package:health_spike/utils/permissions.dart';
 import 'package:provider/provider.dart';
 
 import 'dashboard/dashboard.dart';
@@ -22,6 +26,7 @@ import 'events/pedometer_events.dart';
 
 final EventBus eventBus = EventBus();
 late RabbitMQHandler rabbitMQHandler;
+late ObjectBox objectBoxInstance;
 
 class HealthSpikeAppContainer extends StatefulWidget {
   const HealthSpikeAppContainer({Key? key}) : super(key: key);
@@ -34,8 +39,8 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
   int _selectedItemIndex = 0;
 
   static final List<AppPage> _listOfPages = [
-    AppPage(0, 'My Health', const DashboardBody()),
-    AppPage(1, 'Stocks', const Text('"Stocks" is working!')),
+    AppPage(0, 'Dashboard', const DashboardBody()),
+    AppPage(1, 'Heart', const HeartPageBody()),
     AppPage(2, 'Trade', const Text('"Trade" is working!')),
     AppPage(3, 'Pay', const Text('"Pay" is working!'))
   ];
@@ -67,6 +72,11 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
         ?.then((consumer) => consumer.listen((AmqpMessage message) {
               HeartRateChangedEvent heartRateChangedEvent =
                   HeartRateChangedEvent.fromJson(message.payloadAsJson);
+
+              BlocProvider.of<HeartRateBloc>(context).add(
+                  ReceivedHeartRateMeasurement(
+                      heartRateValue: heartRateChangedEvent.heartRate));
+              // BlocProvider.of<HeartRateBloc>(context).add(GetRecentHeartRate());
 
               Provider.of<HeartRateModel>(context, listen: false)
                   .setCurrentHeartRate(
@@ -181,11 +191,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
-                  label: 'Página Inicial',
+                  label: 'Dashboard',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.pie_chart_outline),
-                  label: 'Ativos',
+                  icon: Icon(Icons.monitor_heart),
+                  label: 'Heart Rate',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.show_chart),
@@ -206,19 +216,37 @@ class _BottomNavBarState extends State<BottomNavBar> {
 void main() async {
   // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
 
-  rabbitMQHandler = RabbitMQHandler("139.59.174.157", "guest", "guest");
+  WidgetsFlutterBinding.ensureInitialized();
+
+  objectBoxInstance = await ObjectBox.create();
+
+  rabbitMQHandler = RabbitMQHandler("68.183.40.100", "guest", "guest");
   await rabbitMQHandler.connect();
 
   runApp(MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => PedometerModel()),
-        ChangeNotifierProvider(create: (context) => HeartRateModel()),
-        ChangeNotifierProvider(create: (context) => LocationModel())
-      ],
-      child: MaterialApp(
-        theme: HealthSpikeTheme.lightTheme,
-        home: const HealthSpikeAppContainer(),
-      )));
+    providers: [
+      ChangeNotifierProvider(create: (context) => PedometerModel()),
+      ChangeNotifierProvider(create: (context) => HeartRateModel()),
+      ChangeNotifierProvider(create: (context) => LocationModel())
+    ],
+    child: RepositoryProvider(
+      create: (context) => HeartRateRepository(),
+      child: MultiBlocProvider(
+          providers: [
+            BlocProvider<HeartRateBloc>(
+              create: (context) => HeartRateBloc(
+                heartRateRepository: context.read<HeartRateRepository>(),
+              )
+                ..add(GetRecentHeartRate())
+                ..add(GetAllHeartRateMeasurements()),
+            ),
+          ],
+          child: MaterialApp(
+            theme: HealthSpikeTheme.lightTheme,
+            home: const HealthSpikeAppContainer(),
+          )),
+    ),
+  ));
 
   AppPedometerSensor().initPlatformState();
 

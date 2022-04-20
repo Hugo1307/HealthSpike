@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/models/location_model.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/models/pedometer_model.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
-import 'package:location/location.dart';
+import 'package:health_spike/models/location_model.dart';
+import 'package:health_spike/models/pedometer_model.dart';
+import 'package:health_spike/themes/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
 
@@ -176,8 +175,8 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                             return Text(
                                               location.currentLocation != null
                                                   ? location
-                                                      .currentLocation!.latitude
-                                                      .toString()
+                                                      .currentLocation!.latitude!
+                                                      .toStringAsFixed(3)
                                                   : 'Loading...',
                                               textAlign: TextAlign.center,
                                               style: const TextStyle(

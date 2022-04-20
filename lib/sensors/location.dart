@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/events/location_events.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/main.dart';
+
+import 'package:health_spike/events/location_events.dart';
+import 'package:health_spike/main.dart';
 import 'package:location/location.dart';
 
 class AppLocationSensor {

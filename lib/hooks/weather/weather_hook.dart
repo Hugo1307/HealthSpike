@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-import 'package:health_spike/pt/ua/deti/icm/health_spike/hooks/weather/weather_api_response.dart';
-
+import 'package:health_spike/hooks/weather/weather_api_response.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherHandler {

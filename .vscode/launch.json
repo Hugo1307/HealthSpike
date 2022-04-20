@@ -8,21 +8,21 @@
             "name": "HealthSpike",
             "request": "launch",
             "type": "dart",
-            "program": "lib/pt/ua/deti/icm/health_spike/main.dart"
+            "program": "lib/main.dart"
         },
         {
             "name": "HealthSpike (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
-            "program": "lib/pt/ua/deti/icm/health_spike/main.dart"
+            "program": "lib/main.dart"
         },
         {
             "name": "HealthSpike (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",
-            "program": "lib/pt/ua/deti/icm/health_spike/main.dart"
+            "program": "lib/main.dart"
         }
     ]
 }

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/models/heart_rate_model.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/themes/app_theme.dart';
-import 'package:health_spike/pt/ua/deti/icm/health_spike/utils/date_formatter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:health_spike/heart_rate/bloc/heart_rate_bloc.dart';
+import 'package:health_spike/heart_rate/bloc/heart_rate_events.dart';
+import 'package:health_spike/heart_rate/bloc/heart_rate_states.dart';
+import 'package:health_spike/models/heart_rate_model.dart';
+import 'package:health_spike/themes/app_theme.dart';
+import 'package:health_spike/utils/date_formatter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +19,11 @@ class HeartRateView extends StatefulWidget {
 class _HeartRateViewState extends State<HeartRateView> {
   @override
   Widget build(BuildContext context) {
+    BlocProvider.of<HeartRateBloc>(context).add(GetRecentHeartRate());
+    BlocProvider.of<HeartRateBloc>(context).add(GetMinHeartRateMeasure());
+    BlocProvider.of<HeartRateBloc>(context).add(GetMaxHeartRateMeasure());
+    BlocProvider.of<HeartRateBloc>(context).add(GetAverageRateMeasure());
+
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 18),
       child: Container(
@@ -63,10 +72,17 @@ class _HeartRateViewState extends State<HeartRateView> {
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.only(left: 4, bottom: 3),
-                            child: Consumer<HeartRateModel>(
-                                builder: (context, heartRateModel, child) {
+                            child: BlocBuilder<HeartRateBloc, HeartRateState>(
+                                buildWhen: (previousState, state) {
+                              return state.heartRateStatus ==
+                                      HeartRateStatus.saving ||
+                                  state.heartRateStatus ==
+                                      HeartRateStatus.lastValueLoaded ||
+                                  state.heartRateStatus ==
+                                      HeartRateStatus.initial;
+                            }, builder: (context, state) {
                               return Text(
-                                heartRateModel.currentHeartRate.toString(),
+                                state.heartRate.toString(),
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontFamily: HealthSpikeTheme.fontName,
@@ -172,15 +188,21 @@ class _HeartRateViewState extends State<HeartRateView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        const Text(
-                          '120 bpm',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: HealthSpikeTheme.fontName,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 15,
-                            letterSpacing: -0.2,
-                            color: HealthSpikeTheme.redWhitened,
+                        BlocBuilder<HeartRateBloc, HeartRateState>(
+                          buildWhen: (previousState, state) {
+                            return state.heartRateStatus ==
+                                HeartRateStatus.maxValueLoaded;
+                          },
+                          builder: (context, state) => Text(
+                            state.heartRate.toString() + ' bpm',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontFamily: HealthSpikeTheme.fontName,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                              letterSpacing: -0.2,
+                              color: HealthSpikeTheme.redWhitened,
+                            ),
                           ),
                         ),
                         Padding(
@@ -208,15 +230,21 @@ class _HeartRateViewState extends State<HeartRateView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            const Text(
-                              '60 bpm',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: HealthSpikeTheme.fontName,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 15,
-                                letterSpacing: -0.2,
-                                color: HealthSpikeTheme.redWhitened,
+                            BlocBuilder<HeartRateBloc, HeartRateState>(
+                              buildWhen: (previousState, state) {
+                                return state.heartRateStatus ==
+                                    HeartRateStatus.minValueLoaded;
+                              },
+                              builder: (context, state) => Text(
+                                state.heartRate.toString() + ' bpm',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontFamily: HealthSpikeTheme.fontName,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                  letterSpacing: -0.2,
+                                  color: HealthSpikeTheme.redWhitened,
+                                ),
                               ),
                             ),
                             Padding(
@@ -246,14 +274,21 @@ class _HeartRateViewState extends State<HeartRateView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: <Widget>[
-                            const Text(
-                              '85 bpm',
-                              style: TextStyle(
-                                fontFamily: HealthSpikeTheme.fontName,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 15,
-                                letterSpacing: -0.2,
-                                color: HealthSpikeTheme.redWhitened,
+                            BlocBuilder<HeartRateBloc, HeartRateState>(
+                              buildWhen: (previousState, state) {
+                                return state.heartRateStatus ==
+                                    HeartRateStatus.avgValueLoaded;
+                              },
+                              builder: (context, state) => Text(
+                                state.heartRate.toString() + ' bpm',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontFamily: HealthSpikeTheme.fontName,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                  letterSpacing: -0.2,
+                                  color: HealthSpikeTheme.redWhitened,
+                                ),
                               ),
                             ),
                             Padding(

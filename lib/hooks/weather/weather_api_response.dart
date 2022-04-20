@@ -1,4 +1,4 @@
-import 'package:health_spike/pt/ua/deti/icm/health_spike/utils/weather_data.dart';
+import 'package:health_spike/utils/weather_data.dart';
 
 class WeatherApiResponse {
   final double latitude;
