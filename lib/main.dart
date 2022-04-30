@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:health_spike/events/heart_rate_changed.dart';
 import 'package:health_spike/events/location_events.dart';
-import 'package:health_spike/heart_page/main_heart_page.dart';
 import 'package:health_spike/heart_rate/bloc/heart_rate_bloc.dart';
 import 'package:health_spike/heart_rate/repository/heart_rate_repository.dart';
 import 'package:health_spike/heart_rate/bloc/heart_rate_events.dart';
@@ -14,8 +13,13 @@ import 'package:health_spike/models/heart_rate_model.dart';
 import 'package:health_spike/models/location_model.dart';
 import 'package:health_spike/models/pedometer_model.dart';
 import 'package:health_spike/objectbox/object_box_handler.dart';
+import 'package:health_spike/pages/heart_page/main_heart_page.dart';
+import 'package:health_spike/pages/steps_page/steps_page.dart';
 import 'package:health_spike/sensors/location.dart';
 import 'package:health_spike/sensors/pedometer.dart';
+import 'package:health_spike/steps/bloc/steps_bloc.dart';
+import 'package:health_spike/steps/bloc/steps_events.dart';
+import 'package:health_spike/steps/repository/steps_repository.dart';
 import 'package:health_spike/themes/app_theme.dart';
 import 'package:health_spike/utils/app_page.dart';
 import 'package:health_spike/utils/permissions.dart';
@@ -41,7 +45,7 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
   static final List<AppPage> _listOfPages = [
     AppPage(0, 'Dashboard', const DashboardBody()),
     AppPage(1, 'Heart', const HeartPageBody()),
-    AppPage(2, 'Trade', const Text('"Trade" is working!')),
+    AppPage(2, 'Steps', const StepsPageBody()),
     AppPage(3, 'Pay', const Text('"Pay" is working!'))
   ];
 
@@ -53,6 +57,12 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
       // All events are of type UserLoggedInEvent (or subtypes of it).
       Provider.of<PedometerModel>(context, listen: false)
           .setStepsCount(event.stepsCount);
+
+      BlocProvider.of<StepsBloc>(context).add(UpdatedStepsEvent(
+        stepsValue: event.stepsCount,
+        timestamp: event.timestamp
+      ));
+          
     });
 
     eventBus.on<PedestrianStatusUpdatedEvent>().listen((event) {
@@ -198,8 +208,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   label: 'Heart Rate',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.show_chart),
-                  label: 'Negociar',
+                  icon: Icon(Icons.directions_walk),
+                  label: 'Steps',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.attach_money),
@@ -229,8 +239,13 @@ void main() async {
       ChangeNotifierProvider(create: (context) => HeartRateModel()),
       ChangeNotifierProvider(create: (context) => LocationModel())
     ],
-    child: RepositoryProvider(
-      create: (context) => HeartRateRepository(),
+    child: MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<HeartRateRepository>(
+            create: (context) => HeartRateRepository()),
+        RepositoryProvider<StepsRepository>(
+            create: (context) => StepsRepository()),
+      ],
       child: MultiBlocProvider(
           providers: [
             BlocProvider<HeartRateBloc>(
@@ -240,6 +255,10 @@ void main() async {
                 ..add(GetRecentHeartRate())
                 ..add(GetAllHeartRateMeasurements()),
             ),
+            BlocProvider<StepsBloc>(
+                create: (context) => StepsBloc(
+                      stepsRepository: context.read<StepsRepository>(),
+                    )..add(GetDailyStepsEvent(date: DateTime.now()))),
           ],
           child: MaterialApp(
             theme: HealthSpikeTheme.lightTheme,
