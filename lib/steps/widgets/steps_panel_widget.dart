@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:health_spike/heart_rate/bloc/heart_rate_bloc.dart';
 import 'package:health_spike/heart_rate/bloc/heart_rate_states.dart';
+import 'package:health_spike/models/pedometer_model.dart';
 import 'package:health_spike/steps/bloc/steps_bloc.dart';
 import 'package:health_spike/steps/bloc/steps_events.dart';
 import 'package:health_spike/steps/bloc/steps_states.dart';
 import 'package:health_spike/themes/app_theme.dart';
 import 'package:health_spike/utils/date_formatter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class StepsPanelView extends StatefulWidget {
   const StepsPanelView({Key? key}) : super(key: key);
@@ -19,8 +21,16 @@ class StepsPanelView extends StatefulWidget {
 class _StepsPanelViewState extends State<StepsPanelView> {
   @override
   Widget build(BuildContext context) {
+
     BlocProvider.of<StepsBloc>(context)
         .add(GetDailyStepsEvent(date: DateTime.now()));
+
+    BlocProvider.of<StepsBloc>(context).add(GetDailyStepsEvent(
+        date: DateTime.now().subtract(const Duration(days: 1))));
+
+    BlocProvider.of<StepsBloc>(context)
+        .add(GetWeeklyStepsEvent(date: DateTime.now()));
+
     BlocProvider.of<StepsBloc>(context).add(GetLastWalkTimestampEvent());
 
     return Padding(
@@ -75,10 +85,19 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                                 buildWhen: (previous, current) =>
                                     previous != current &&
                                     current.status != null &&
-                                    current.status!.event is GetDailyStepsEvent,
+                                    current.status!.event
+                                        is GetDailyStepsEvent &&
+                                    (current.status!.event
+                                                as GetDailyStepsEvent)
+                                            .date
+                                            .difference(DateTime.now())
+                                            .inDays ==
+                                        0,
                                 builder: (context, state) {
                                   return Text(
-                                    state.status!.value.toString(),
+                                    (state.status!.value is int)
+                                        ? state.status!.value.toString()
+                                        : "0",
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
                                       fontFamily: HealthSpikeTheme.fontName,
@@ -188,13 +207,14 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        BlocBuilder<HeartRateBloc, HeartRateState>(
-                          buildWhen: (previousState, state) {
-                            return state.heartRateStatus ==
-                                HeartRateStatus.maxValueLoaded;
-                          },
+                        BlocBuilder<StepsBloc, StepsState>(
+                          buildWhen: (previous, current) =>
+                              previous != current &&
+                              current.status != null &&
+                              current.status!.event is GetDailyStepsEvent &&
+                              (current.status!.event as GetDailyStepsEvent).date.difference(DateTime.now()).inDays ==-1,
                           builder: (context, state) => Text(
-                            state.heartRate.toString() + ' bpm',
+                            ((state.status!.value.toString() is int) ? state.status!.value.toString() : "0") + ' steps',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontFamily: HealthSpikeTheme.fontName,
@@ -208,7 +228,7 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                         Padding(
                           padding: const EdgeInsets.only(top: 6),
                           child: Text(
-                            'Min',
+                            'Yesterday',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: HealthSpikeTheme.fontName,
@@ -230,13 +250,13 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            BlocBuilder<HeartRateBloc, HeartRateState>(
-                              buildWhen: (previousState, state) {
-                                return state.heartRateStatus ==
-                                    HeartRateStatus.minValueLoaded;
-                              },
+                            BlocBuilder<StepsBloc, StepsState>(
+                              buildWhen: (previous, current) =>
+                                  previous != current &&
+                                  current.status != null &&
+                                  current.status!.event is GetWeeklyStepsEvent,
                               builder: (context, state) => Text(
-                                state.heartRate.toString() + ' bpm',
+                                ((state.status!.value.toString() is int) ? state.status!.value.toString() : '0') + ' steps',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontFamily: HealthSpikeTheme.fontName,
@@ -250,7 +270,7 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                             Padding(
                               padding: const EdgeInsets.only(top: 6),
                               child: Text(
-                                'Min',
+                                'Week',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: HealthSpikeTheme.fontName,
@@ -274,13 +294,10 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: <Widget>[
-                            BlocBuilder<HeartRateBloc, HeartRateState>(
-                              buildWhen: (previousState, state) {
-                                return state.heartRateStatus ==
-                                    HeartRateStatus.avgValueLoaded;
-                              },
-                              builder: (context, state) => Text(
-                                state.heartRate.toString() + ' bpm',
+                            Consumer<PedometerModel>(
+                                builder: (context, pedometer, child) {
+                              return Text(
+                                pedometer.stepCount.toString() + ' steps',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontFamily: HealthSpikeTheme.fontName,
@@ -289,12 +306,12 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                                   letterSpacing: -0.2,
                                   color: HealthSpikeTheme.mainGreen,
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
                             Padding(
                               padding: const EdgeInsets.only(top: 6),
                               child: Text(
-                                'Average',
+                                'All Time',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: HealthSpikeTheme.fontName,

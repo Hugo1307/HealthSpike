@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 
 class LocationModel extends ChangeNotifier {
+  
   double _distance = 0;
   LocationData? _currentLocation;
 

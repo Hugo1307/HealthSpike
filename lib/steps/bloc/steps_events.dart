@@ -31,3 +31,14 @@ class GetDailyStepsEvent extends StepsEvent {
   List<Object?> get props => [date];
 
 }
+
+class GetWeeklyStepsEvent extends StepsEvent {
+
+  final DateTime date;
+
+  GetWeeklyStepsEvent({required this.date});
+
+  @override
+  List<Object?> get props => [date];
+
+}

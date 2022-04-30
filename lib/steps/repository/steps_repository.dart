@@ -50,14 +50,52 @@ class StepsRepository {
 
     var completer = Completer<int>();
 
-    final QueryBuilder<Steps> queryBuilder = stepsBox.query(Steps_.timestamp.between(0, date.subtract(const Duration(days: 1)).millisecondsSinceEpoch));
-    final Query<Steps> query = queryBuilder.build();
-    final PropertyQuery<int> pq = query.property(Steps_.count);
-    
-    int oldSteps = pq.sum();
-    await getMostRecentMeasurement().then((currentSteps) {
-      completer.complete(currentSteps.count - oldSteps);
-    });
+    final QueryBuilder<Steps> todayStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(date.subtract(const Duration(days: 1)).millisecondsSinceEpoch, date.millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
+    final Query<Steps> todayStepsQuery = todayStepsQueryBuilder.build();
+
+    final QueryBuilder<Steps> oldStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(0, date.subtract(const Duration(days: 1)).millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
+    final Query<Steps> oldStepsQuery = oldStepsQueryBuilder.build();
+
+    Steps? highestOldRecord = oldStepsQuery.findFirst();
+    Steps? todayHighestRecord = todayStepsQuery.findFirst();
+
+    if (todayHighestRecord != null) {
+      if (highestOldRecord != null) {
+        completer.complete(todayHighestRecord.count - highestOldRecord.count);
+      } else {
+        completer.complete(todayHighestRecord.count);
+      }
+    } else {
+      completer.complete(0);
+    }
+
+    return completer.future;
+
+  }
+
+  Future<int> getStepsForLastWeek(DateTime date) async {
+
+    var completer = Completer<int>();
+
+    final QueryBuilder<Steps> weekStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(date.subtract(const Duration(days: 7)).millisecondsSinceEpoch, date.millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
+    final Query<Steps> weekStepsQuery = weekStepsQueryBuilder.build();
+
+    final QueryBuilder<Steps> oldStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(0, date.subtract(const Duration(days: 7)).millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
+    final Query<Steps> oldStepsQuery = oldStepsQueryBuilder.build();
+
+    Steps? highestOldRecord = oldStepsQuery.findFirst();
+    Steps? weekHighestRecord = weekStepsQuery.findFirst();
+
+    if (weekHighestRecord != null) {
+      if (highestOldRecord != null) {
+        completer.complete(weekHighestRecord.count - highestOldRecord.count);
+      } else {
+        completer.complete(weekHighestRecord.count);
+      }
+    } else {
+      completer.complete(0);
+    }
+
     return completer.future;
 
   }

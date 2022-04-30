@@ -1,22 +1,46 @@
 
+import 'dart:math';
+
 import 'package:health_spike/events/location_events.dart';
 import 'package:health_spike/main.dart';
 import 'package:location/location.dart';
 
 class AppLocationSensor {
+
   Location location = Location();
 
-  LocationData? _currentLocation;
-  String _distance = '?', _status = '?';
+  LocationData? _currentLocationData;
+  double _totalDistance = 0;
+  
+  double rad(degrees) {
+    return (degrees * pi) / 180;
+  }
 
-  void onDistanceChanged(Location loc) {
-    LocationData locationaData = loc.getLocation() as LocationData;
-    double? _distanceDouble = locationaData.latitude?.toDouble();
-    if (_distanceDouble != null) {
-      eventBus.fire(DistanceUpdatedEvent(_distanceDouble, DateTime.now()));
-    } else {
-      onDistanceCountError();
+  Future<double> calcDistance(LocationData oldLocationData, LocationData newLocationData) async {
+
+    double oldLocationLatituteRad = rad(oldLocationData.latitude!.toDouble());
+    double oldLocationLongitudeRad = rad(oldLocationData.longitude!.toDouble());
+      
+    double newLocationLatitudeRad = rad(newLocationData.latitude!.toDouble());
+    double newLocationLongitudeRad = rad(newLocationData.longitude!.toDouble());
+
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 - c((newLocationLatitudeRad - oldLocationLatituteRad) * p)/2 + 
+          c(oldLocationLatituteRad * p) * c(newLocationLatitudeRad * p) * 
+          (1 - c((newLocationLongitudeRad - oldLocationLongitudeRad) * p))/2;
+    return 12742 * asin(sqrt(a));
+
+  }
+
+  void onDistanceChanging(final LocationData newLocationData) async {
+    
+    if (_currentLocationData != null) {
+      _totalDistance = _totalDistance + await calcDistance(_currentLocationData!, newLocationData);
     }
+
+    _currentLocationData = newLocationData;
+
   }
 
   void onDistanceCountError() {
@@ -24,6 +48,7 @@ class AppLocationSensor {
   }
 
   Future<void> initPlatformState() async {
+
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
 
@@ -44,11 +69,10 @@ class AppLocationSensor {
     }
 
     location.onLocationChanged.listen((LocationData currentSensorLocation) {
-      print('Location Changed');
-      _currentLocation = currentSensorLocation;
-      eventBus.fire(LocationChangedEvent(_currentLocation!));
+      onDistanceChanging(currentSensorLocation);
+      eventBus.fire(DistanceUpdatedEvent(timestamp: DateTime.now(), distance: _totalDistance));
     });
 
-    // _distance = _currentLocation!.latitude.toString();
   }
+
 }

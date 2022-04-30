@@ -173,11 +173,7 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                               builder:
                                                   (context, location, child) {
                                             return Text(
-                                              location.currentLocation != null
-                                                  ? location
-                                                      .currentLocation!.latitude!
-                                                      .toStringAsFixed(3)
-                                                  : 'Loading...',
+                                              location.distance.toStringAsFixed(4),
                                               textAlign: TextAlign.center,
                                               style: const TextStyle(
                                                 fontFamily:

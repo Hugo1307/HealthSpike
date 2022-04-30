@@ -4,7 +4,7 @@ class DistanceUpdatedEvent {
   DateTime timestamp;
   double distance;
 
-  DistanceUpdatedEvent(this.distance, this.timestamp);
+  DistanceUpdatedEvent({required this.timestamp, required this.distance});
 }
 
 class LocationStatusUpdatedEvent {

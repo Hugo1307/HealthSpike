@@ -42,19 +42,19 @@ class HeartRateBloc extends Bloc<HeartRateEvent, HeartRateState> {
 
   void _mapGetMaxHeartRateMeasureToState(GetMaxHeartRateMeasure event, Emitter<HeartRateState> emit) async {
     await heartRateRepository.getMaxHeartRate().then((value) {
-      emit(HeartRateState(heartRateStatus: HeartRateStatus.maxValueLoaded, heartRate: value));
+      value.isNaN ? emit(const HeartRateState(heartRateStatus: HeartRateStatus.maxValueLoaded, heartRate: 0)) : emit(HeartRateState(heartRateStatus: HeartRateStatus.minValueLoaded, heartRate: value));
     });
   }
 
   void _mapGetMinHeartRateMeasureToState(GetMinHeartRateMeasure event, Emitter<HeartRateState> emit) async {
     await heartRateRepository.getMinHeartRate().then((value) {
-      emit(HeartRateState(heartRateStatus: HeartRateStatus.minValueLoaded, heartRate: value));
+      value.isNaN ? emit(const HeartRateState(heartRateStatus: HeartRateStatus.minValueLoaded, heartRate: 0)) : emit(HeartRateState(heartRateStatus: HeartRateStatus.minValueLoaded, heartRate: value));
     });
   }
 
   void _mapGetAverageHeartRateMeasureToState(GetAverageRateMeasure event, Emitter<HeartRateState> emit) async {
     await heartRateRepository.getAverageHeartRate().then((value) {
-      emit(HeartRateState(heartRateStatus: HeartRateStatus.avgValueLoaded, heartRate: value.round().toDouble()));
+      value.isNaN ? emit(const HeartRateState(heartRateStatus: HeartRateStatus.avgValueLoaded, heartRate: 0)) : emit(HeartRateState(heartRateStatus: HeartRateStatus.avgValueLoaded, heartRate: value.roundToDouble()));
     });
   }
 

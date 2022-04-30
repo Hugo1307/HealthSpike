@@ -71,10 +71,10 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
           .setPedestrianState(event.pedestrianStatus);
     });
 
-    eventBus.on<LocationChangedEvent>().listen((event) {
+    eventBus.on<DistanceUpdatedEvent>().listen((event) {
       // All events are of type UserLoggedInEvent (or subtypes of it).
       Provider.of<LocationModel>(context, listen: false)
-          .setCurrentLocation(event.location);
+          .setDistance(event.distance);
     });
 
     rabbitMQHandler

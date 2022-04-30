@@ -4,7 +4,6 @@ import 'dart:collection';
 import 'package:health_spike/heart_rate/model/heart_rate_model.dart';
 import 'package:health_spike/main.dart';
 import 'package:health_spike/objectbox.g.dart';
-import 'package:objectbox/objectbox.dart';
 
 class HeartRateRepository {
 

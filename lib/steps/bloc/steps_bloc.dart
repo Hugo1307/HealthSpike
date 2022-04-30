@@ -13,6 +13,7 @@ class StepsBloc extends Bloc<StepsEvent, StepsState> {
     on<GetLastWalkTimestampEvent>(_mapGetLastWalkTimestampEvent);
     on<UpdatedStepsEvent>(_mapUpdatedStepsToState);
     on<GetDailyStepsEvent>(_mapGetDailyStepsToState);
+    on<GetWeeklyStepsEvent>(_mapGetWeeklyStepsToState);
   }
 
   void _mapGetRecentStepsCountToState(GetRecentStepsCountEvent event, Emitter<StepsState> emit) async {
@@ -46,6 +47,15 @@ class StepsBloc extends Bloc<StepsEvent, StepsState> {
     
     emit(StepsState(status: StepsStatus(event, Status.loading, 0)));
     await stepsRepository.getStepsForDay(event.date).then((value) {
+      emit(StepsState(status: StepsStatus(event, Status.loaded, value)));
+    });
+
+  }
+
+  void _mapGetWeeklyStepsToState(GetWeeklyStepsEvent event, Emitter<StepsState> emit) async {
+    
+    emit(StepsState(status: StepsStatus(event, Status.loading, 0)));
+    await stepsRepository.getStepsForLastWeek(event.date).then((value) {
       emit(StepsState(status: StepsStatus(event, Status.loaded, value)));
     });
 
