@@ -50,9 +50,62 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "3:7575841691801310955",
+      "lastPropertyId": "3:2705827605397998403",
+      "name": "DistanceModel",
+      "properties": [
+        {
+          "id": "1:8566782953482511763",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7270321725949969941",
+          "name": "timestamp",
+          "type": 10
+        },
+        {
+          "id": "3:2705827605397998403",
+          "name": "distance",
+          "type": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:4346055131580983872",
+      "lastPropertyId": "4:4943654989236320860",
+      "name": "LocationModel",
+      "properties": [
+        {
+          "id": "1:1701705523055985686",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2964692066299722293",
+          "name": "timestamp",
+          "type": 10
+        },
+        {
+          "id": "3:6691095913261528300",
+          "name": "latitude",
+          "type": 8
+        },
+        {
+          "id": "4:4943654989236320860",
+          "name": "longitude",
+          "type": 8
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "2:825835631202772026",
+  "lastEntityId": "4:4346055131580983872",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",

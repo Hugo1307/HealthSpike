@@ -80,6 +80,7 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
     rabbitMQHandler
         .consumeMessage()
         ?.then((consumer) => consumer.listen((AmqpMessage message) {
+
               HeartRateChangedEvent heartRateChangedEvent =
                   HeartRateChangedEvent.fromJson(message.payloadAsJson);
 
