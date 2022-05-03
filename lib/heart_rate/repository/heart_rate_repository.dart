@@ -44,9 +44,25 @@ class HeartRateRepository {
 
   }
 
+  Future<List<HeartRate>> getDailyMeasurements(DateTime date) {
+
+    var completer = Completer<List<HeartRate>>();
+
+    final QueryBuilder<HeartRate> dailyMeasurementsQueryBuilder = heartRateBox.query(HeartRate_.timestamp.between(date.subtract(const Duration(days: 1)).millisecondsSinceEpoch, date.millisecondsSinceEpoch))..order(HeartRate_.timestamp);
+    final Query<HeartRate> dailyMeasurementsQuery = dailyMeasurementsQueryBuilder.build();
+
+    List<HeartRate> allHeartRates = dailyMeasurementsQuery.find();
+
+    allHeartRates.removeWhere((element) => element.heartRateValue == 0);
+
+    completer.complete(allHeartRates);
+    return completer.future;
+
+  }
+
   Future<SplayTreeMap<DateTime, double>> getDailyAverages() async {
 
-    List<HeartRate> allHeartRates = await getAllMeasurements();
+    List<HeartRate> allHeartRates = await getDailyMeasurements(DateTime.now());
     SplayTreeMap<DateTime, double> totalMeasurementsValue = SplayTreeMap<DateTime, double>();
     SplayTreeMap<DateTime, int> totalMeasurementsCount = SplayTreeMap<DateTime, int>();
     SplayTreeMap<DateTime, double> averageMeasurements = SplayTreeMap<DateTime, double>();

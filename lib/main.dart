@@ -4,17 +4,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:health_spike/events/heart_rate_changed.dart';
-import 'package:health_spike/events/location_events.dart';
 import 'package:health_spike/heart_rate/bloc/heart_rate_bloc.dart';
 import 'package:health_spike/heart_rate/repository/heart_rate_repository.dart';
 import 'package:health_spike/heart_rate/bloc/heart_rate_events.dart';
 import 'package:health_spike/hooks/queue/rabbit_mq_handler.dart';
-import 'package:health_spike/models/heart_rate_model.dart';
-import 'package:health_spike/models/location_model.dart';
-import 'package:health_spike/models/pedometer_model.dart';
+import 'package:health_spike/location/bloc/location_bloc.dart';
+import 'package:health_spike/location/bloc/location_events.dart';
+import 'package:health_spike/location/repository/location_repository.dart';
 import 'package:health_spike/objectbox/object_box_handler.dart';
+import 'package:health_spike/pages/distance_page/distance_page.dart';
 import 'package:health_spike/pages/heart_page/main_heart_page.dart';
 import 'package:health_spike/pages/steps_page/steps_page.dart';
+import 'package:health_spike/provider_models/heart_rate_provider_model.dart';
+import 'package:health_spike/provider_models/location_provider_model.dart';
+import 'package:health_spike/provider_models/pedometer_provider_model.dart';
 import 'package:health_spike/sensors/location.dart';
 import 'package:health_spike/sensors/pedometer.dart';
 import 'package:health_spike/steps/bloc/steps_bloc.dart';
@@ -46,52 +49,63 @@ class _HealthSpikeAppContainerState extends State<HealthSpikeAppContainer> {
     AppPage(0, 'Dashboard', const DashboardBody()),
     AppPage(1, 'Heart', const HeartPageBody()),
     AppPage(2, 'Steps', const StepsPageBody()),
-    AppPage(3, 'Pay', const Text('"Pay" is working!'))
+    AppPage(3, 'Distance', const DistancePageBody())
   ];
 
   @override
   void initState() {
+
     super.initState();
 
     eventBus.on<StepsUpdatedEvent>().listen((event) {
-      // All events are of type UserLoggedInEvent (or subtypes of it).
-      Provider.of<PedometerModel>(context, listen: false)
+
+      Provider.of<PedometerProviderModel>(context, listen: false)
           .setStepsCount(event.stepsCount);
 
       BlocProvider.of<StepsBloc>(context).add(UpdatedStepsEvent(
-        stepsValue: event.stepsCount,
-        timestamp: event.timestamp
-      ));
-          
+          stepsValue: event.stepsCount, timestamp: event.timestamp));
+
     });
 
     eventBus.on<PedestrianStatusUpdatedEvent>().listen((event) {
-      // All events are of type UserLoggedInEvent (or subtypes of it).
-      Provider.of<PedometerModel>(context, listen: false)
+      Provider.of<PedometerProviderModel>(context, listen: false)
           .setPedestrianState(event.pedestrianStatus);
     });
 
     eventBus.on<DistanceUpdatedEvent>().listen((event) {
-      // All events are of type UserLoggedInEvent (or subtypes of it).
-      Provider.of<LocationModel>(context, listen: false)
+
+      Provider.of<LocationProviderModel>(context, listen: false)
           .setDistance(event.distance);
+
+      BlocProvider.of<LocationBloc>(context).add(DistanceUpdatedEvent(
+          timestamp: event.timestamp, distance: event.distance));
+
+    });
+
+    eventBus.on<LocationUpdatedEvent>().listen((event) {
+      
+      Provider.of<LocationProviderModel>(context, listen: false)
+          .setCurrentLocation(event.latitude, event.longitude);
+
+      BlocProvider.of<LocationBloc>(context).add(LocationUpdatedEvent(
+          timestamp: event.timestamp, latitude: event.latitude, longitude: event.longitude));
+
     });
 
     rabbitMQHandler
         .consumeMessage()
         ?.then((consumer) => consumer.listen((AmqpMessage message) {
-
               HeartRateChangedEvent heartRateChangedEvent =
                   HeartRateChangedEvent.fromJson(message.payloadAsJson);
 
               BlocProvider.of<HeartRateBloc>(context).add(
                   ReceivedHeartRateMeasurement(
                       heartRateValue: heartRateChangedEvent.heartRate));
-              // BlocProvider.of<HeartRateBloc>(context).add(GetRecentHeartRate());
 
-              Provider.of<HeartRateModel>(context, listen: false)
+              Provider.of<HeartRateProviderModel>(context, listen: false)
                   .setCurrentHeartRate(
                       heartRateChangedEvent.heartRate, DateTime.now());
+
             }));
   }
 
@@ -213,8 +227,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   label: 'Steps',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.attach_money),
-                  label: 'Pagar',
+                  icon: Icon(Icons.gps_fixed),
+                  label: 'Distance',
                 ),
               ],
               currentIndex: _selectedIndex,
@@ -236,9 +250,9 @@ void main() async {
 
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (context) => PedometerModel()),
-      ChangeNotifierProvider(create: (context) => HeartRateModel()),
-      ChangeNotifierProvider(create: (context) => LocationModel())
+      ChangeNotifierProvider(create: (context) => PedometerProviderModel()),
+      ChangeNotifierProvider(create: (context) => HeartRateProviderModel()),
+      ChangeNotifierProvider(create: (context) => LocationProviderModel())
     ],
     child: MultiRepositoryProvider(
       providers: [
@@ -246,6 +260,8 @@ void main() async {
             create: (context) => HeartRateRepository()),
         RepositoryProvider<StepsRepository>(
             create: (context) => StepsRepository()),
+        RepositoryProvider<LocationRepository>(
+            create: (context) => LocationRepository()),
       ],
       child: MultiBlocProvider(
           providers: [
@@ -260,6 +276,10 @@ void main() async {
                 create: (context) => StepsBloc(
                       stepsRepository: context.read<StepsRepository>(),
                     )..add(GetDailyStepsEvent(date: DateTime.now()))),
+            BlocProvider<LocationBloc>(
+                create: (context) => LocationBloc(
+                      locationRepository: context.read<LocationRepository>(),
+                    )..add(GetDailyDistanceEvent(date: DateTime.now()))),
           ],
           child: MaterialApp(
             theme: HealthSpikeTheme.lightTheme,

@@ -3,14 +3,8 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
-class LineChartSeries {
-  final DateTime timestamp;
-  final double value;
-
-  LineChartSeries(this.timestamp, this.value);
-}
-
 class LineChart extends StatelessWidget {
+
   final String id;
   final Color chartColor;
   final SplayTreeMap<DateTime, double> dataSamples;
@@ -22,34 +16,46 @@ class LineChart extends StatelessWidget {
       required this.dataSamples})
       : super(key: key);
 
-  _convertDataSamples() {
-
-    List<LineChartSeries> data = [];
-
-    dataSamples.forEach((key, value) => data.add(LineChartSeries(key, value)));
+  List<TimeChartSeries> _convertDataSamples() {
+    List<TimeChartSeries> data = [];
+    dataSamples.forEach((key, value) => data.add(TimeChartSeries(key, value)));
     return data;
   }
 
+  List<charts.Series<TimeChartSeries, DateTime>> _createDataSamples() =>
+    [charts.Series<TimeChartSeries, DateTime>(
+        id: id,
+        colorFn: (_, __) => charts.ColorUtil.fromDartColor(chartColor),
+        domainFn: (TimeChartSeries series, _) => series.timestamp,
+        measureFn: (TimeChartSeries series, _) => series.value,
+        data: _convertDataSamples(),
+      )];
+  
+
   @override
   Widget build(BuildContext context) {
-    List<LineChartSeries> data = _convertDataSamples();
-
-    List<charts.Series<LineChartSeries, int>> series = [
-      charts.Series(
-          id: id,
-          colorFn: (_, __) => charts.ColorUtil.fromDartColor(chartColor),
-          data: data,
-          domainFn: (LineChartSeries series, _) => data.last.timestamp.millisecondsSinceEpoch - series.timestamp.millisecondsSinceEpoch ,
-          measureFn: (LineChartSeries series, _) => series.value)
-    ];
-
-    return charts.LineChart(
-      series,
+    return charts.TimeSeriesChart(
+      _createDataSamples(),
       animate: true,
-      domainAxis: const charts.NumericAxisSpec(
-          showAxisLine: false, renderSpec: charts.NoneRenderSpec()),
       primaryMeasureAxis: const charts.NumericAxisSpec(tickProviderSpec:
-                charts.BasicNumericTickProviderSpec(zeroBound: false))  
+                charts.BasicNumericTickProviderSpec(zeroBound: false)),
+      domainAxis: const charts.DateTimeAxisSpec(
+          tickFormatterSpec: charts.AutoDateTimeTickFormatterSpec(
+        hour: charts.TimeFormatterSpec(
+            format: 'hh', transitionFormat: 'dd/MM hh:mm'),
+        minute: charts.TimeFormatterSpec(
+          format: 'HH:mm',
+          transitionFormat: 'HH:mm',
+        ),
+      )),
     );
   }
+
+}
+
+class TimeChartSeries {
+  final DateTime timestamp;
+  final double value;
+
+  TimeChartSeries(this.timestamp, this.value);
 }

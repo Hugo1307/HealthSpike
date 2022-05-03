@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -18,10 +19,27 @@ class StepsWidgetChartView extends StatefulWidget {
 
 class _StepsWidgetChartViewState extends State<StepsWidgetChartView> {
   
+  Timer? dataUpdaterTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    dataUpdaterTimer = Timer.periodic(const Duration(seconds: 5), (Timer t) => updateData());
+    updateData();
+  }
+
+  @override
+  void dispose() {
+    dataUpdaterTimer?.cancel();
+    super.dispose();
+  }
+
+  void updateData() {
+    BlocProvider.of<HeartRateBloc>(context).add(GetAllHeartRateMeasurements());
+  }
+
   @override
   Widget build(BuildContext context) {
-    
-    BlocProvider.of<HeartRateBloc>(context).add(GetAllHeartRateMeasurements());
 
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 18),

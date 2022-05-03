@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:health_spike/heart_rate/bloc/heart_rate_bloc.dart';
 import 'package:health_spike/heart_rate/bloc/heart_rate_events.dart';
 import 'package:health_spike/heart_rate/bloc/heart_rate_states.dart';
-import 'package:health_spike/models/heart_rate_model.dart';
+import 'package:health_spike/provider_models/heart_rate_provider_model.dart';
 import 'package:health_spike/themes/app_theme.dart';
 import 'package:health_spike/utils/date_formatter.dart';
 import 'package:intl/intl.dart';
@@ -17,12 +19,31 @@ class HeartRateView extends StatefulWidget {
 }
 
 class _HeartRateViewState extends State<HeartRateView> {
+
+  Timer? dataUpdaterTimer;
+
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    dataUpdaterTimer = Timer.periodic(const Duration(seconds: 5), (Timer t) => updateData());
+    updateData();
+  }
+
+  @override
+  void dispose() {
+    dataUpdaterTimer?.cancel();
+    super.dispose();
+  }
+
+  void updateData() {
     BlocProvider.of<HeartRateBloc>(context).add(GetRecentHeartRate());
     BlocProvider.of<HeartRateBloc>(context).add(GetMinHeartRateMeasure());
     BlocProvider.of<HeartRateBloc>(context).add(GetMaxHeartRateMeasure());
     BlocProvider.of<HeartRateBloc>(context).add(GetAverageRateMeasure());
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 18),
@@ -123,7 +144,7 @@ class _HeartRateViewState extends State<HeartRateView> {
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(left: 4.0),
-                                child: Consumer<HeartRateModel>(
+                                child: Consumer<HeartRateProviderModel>(
                                     builder: (context, heartRateModel, child) {
                                   return Text(
                                     DateFormatter.format(

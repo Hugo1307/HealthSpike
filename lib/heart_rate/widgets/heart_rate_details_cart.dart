@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -8,14 +9,38 @@ import 'package:health_spike/heart_rate/bloc/heart_rate_states.dart';
 import 'package:health_spike/themes/app_theme.dart';
 import 'package:health_spike/utils/charts_utils.dart';
 
-class HeartRateDetailsChartView extends StatelessWidget {
+class HeartRateDetailsChartView extends StatefulWidget {
+  
   const HeartRateDetailsChartView({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    
-    BlocProvider.of<HeartRateBloc>(context).add(GetAllHeartRateMeasurements());
+  State<StatefulWidget> createState() => _HeartRateDetailsChartViewState();
 
+}
+
+class _HeartRateDetailsChartViewState extends State<HeartRateDetailsChartView> {
+
+  Timer? dataUpdaterTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    dataUpdaterTimer = Timer.periodic(const Duration(seconds: 5), (Timer t) => updateData());
+    updateData();
+  }
+
+  @override
+  void dispose() {
+    dataUpdaterTimer?.cancel();
+    super.dispose();
+  }
+
+  void updateData() {
+    BlocProvider.of<HeartRateBloc>(context).add(GetAllHeartRateMeasurements());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 18),
       child: Container(
@@ -34,7 +59,7 @@ class HeartRateDetailsChartView extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.only(top: 16, left: 16, right: 24),
+            padding: const EdgeInsets.only(top: 16, left: 16, right: 8, bottom: 16),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const Padding(

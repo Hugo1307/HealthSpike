@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class HeartRateModel extends ChangeNotifier {
+class HeartRateProviderModel extends ChangeNotifier {
   double _currentHeartRate = 0;
   DateTime? _lastTimestamp;
 

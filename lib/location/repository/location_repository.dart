@@ -33,5 +33,51 @@ class LocationRepository {
     return completer.future;
 
   }
+
+  Future<double> getTotalDistance() {
+
+    Completer<double> completer = Completer<double>();
+
+    final QueryBuilder<DistanceModel> distanceQueryBuilder = distanceBox.query();
+    final Query<DistanceModel> distanceQuery = distanceQueryBuilder.build();
+    final PropertyQuery<double> propertyQuery = distanceQuery.property(DistanceModel_.distance);
+
+    double totalDistance = propertyQuery.sum();
+
+    completer.complete(totalDistance);
+    return completer.future;
+
+
+  }
+
+  Future<double> getDailyDistance(DateTime dateTime) {
+    
+     Completer<double> completer = Completer<double>();
+
+    final QueryBuilder<DistanceModel> distanceQueryBuilder = distanceBox.query(DistanceModel_.timestamp.between(dateTime.subtract(const Duration(days: 1)).millisecondsSinceEpoch, dateTime.microsecondsSinceEpoch));
+    final Query<DistanceModel> distanceQuery = distanceQueryBuilder.build();
+    final PropertyQuery<double> propertyQuery = distanceQuery.property(DistanceModel_.distance);
+
+    double totalDistance = propertyQuery.sum();
+
+    completer.complete(totalDistance);
+    return completer.future;
+
+  } 
+
+  Future<double> getWeeklyDistance(DateTime dateTime) {
+    
+     Completer<double> completer = Completer<double>();
+
+    final QueryBuilder<DistanceModel> distanceQueryBuilder = distanceBox.query(DistanceModel_.timestamp.between(dateTime.subtract(const Duration(days: 7)).millisecondsSinceEpoch, dateTime.microsecondsSinceEpoch));
+    final Query<DistanceModel> distanceQuery = distanceQueryBuilder.build();
+    final PropertyQuery<double> propertyQuery = distanceQuery.property(DistanceModel_.distance);
+
+    double totalDistance = propertyQuery.sum();
+
+    completer.complete(totalDistance);
+    return completer.future;
+
+  } 
   
 }

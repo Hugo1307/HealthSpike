@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:health_spike/models/location_model.dart';
-import 'package:health_spike/models/pedometer_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:health_spike/location/bloc/location_bloc.dart';
+import 'package:health_spike/location/bloc/location_events.dart';
+import 'package:health_spike/location/bloc/location_states.dart';
+import 'package:health_spike/provider_models/pedometer_provider_model.dart';
 import 'package:health_spike/themes/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
@@ -10,11 +15,33 @@ class OverviewPanelView extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _OverviewPanelViewState();
+
 }
 
 class _OverviewPanelViewState extends State<OverviewPanelView> {
+
+  Timer? dataUpdaterTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    dataUpdaterTimer = Timer.periodic(const Duration(seconds: 5), (Timer t) => updateData());
+    updateData();
+  }
+
+  @override
+  void dispose() {
+    dataUpdaterTimer?.cancel();
+    super.dispose();
+  }
+
+  void updateData() {
+    BlocProvider.of<LocationBloc>(context).add(GetDailyDistanceEvent(date: DateTime.now()));
+  }
+
   @override
   Widget build(BuildContext context) {
+    
     return Padding(
       padding: const EdgeInsets.only(left: 0, right: 0, top: 16, bottom: 18),
       child: Container(
@@ -93,9 +120,10 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                         Padding(
                                           padding: const EdgeInsets.only(
                                               left: 4, bottom: 3),
-                                          child: Consumer<PedometerModel>(
-                                              builder:
-                                                  (context, pedometer, child) {
+                                          child:
+                                              Consumer<PedometerProviderModel>(
+                                                  builder: (context, pedometer,
+                                                      child) {
                                             return Text(
                                               '${pedometer.stepCount}',
                                               textAlign: TextAlign.center,
@@ -167,25 +195,40 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                               "assets/fitness_app/burned.png"),
                                         ),
                                         Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 4, bottom: 3),
-                                          child: Consumer<LocationModel>(
-                                              builder:
-                                                  (context, location, child) {
-                                            return Text(
-                                              location.distance.toStringAsFixed(4),
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                fontFamily:
-                                                    HealthSpikeTheme.fontName,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 16,
-                                                color:
-                                                    HealthSpikeTheme.darkerText,
-                                              ),
-                                            );
-                                          }),
-                                        ),
+                                            padding: const EdgeInsets.only(
+                                                left: 4, bottom: 3),
+                                            child: BlocBuilder<LocationBloc,
+                                                    LocationState>(
+                                                buildWhen: (previousState,
+                                                        state) =>
+                                                    previousState != state &&
+                                                    state.status != null &&
+                                                    state.status!.event
+                                                        is GetDailyDistanceEvent &&
+                                                    state.status!.status ==
+                                                        LocationStateStatus
+                                                            .loaded,
+                                                builder: (context, state) =>
+                                                  Text(
+                                                    state.status != null
+                                                        ? state.status!.value is double
+                                                            ? (state.status!.value as double)
+                                                                .toStringAsFixed(2)
+                                                            : '0'
+                                                        : '0',
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                      fontFamily:
+                                                          HealthSpikeTheme
+                                                              .fontName,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 16,
+                                                      color: HealthSpikeTheme
+                                                          .darkerText,
+                                                    ),
+                                                  ),
+                                                )),
                                         Padding(
                                           padding: const EdgeInsets.only(
                                               left: 8, bottom: 3),
@@ -239,7 +282,7 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: <Widget>[
-                                  Consumer<PedometerModel>(
+                                  Consumer<PedometerProviderModel>(
                                       builder: (context, pedometer, child) {
                                     return Text(
                                       '${(pedometer.dailyGoal > pedometer.stepCount ? pedometer.dailyGoal - pedometer.stepCount : pedometer.stepCount).toInt()}',
@@ -253,7 +296,7 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                                       ),
                                     );
                                   }),
-                                  Consumer<PedometerModel>(
+                                  Consumer<PedometerProviderModel>(
                                       builder: (context, pedometer, child) {
                                     return Text(
                                       'Steps ${pedometer.dailyGoal > pedometer.stepCount ? 'left' : ''}',
@@ -274,7 +317,7 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Consumer<PedometerModel>(
+                            child: Consumer<PedometerProviderModel>(
                                 builder: (context, pedometer, child) {
                               return CustomPaint(
                                 painter: CurvePainter(
@@ -313,7 +356,7 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
               padding: const EdgeInsets.only(left: 24, right: 24),
               child: Row(
                 children: <Widget>[
-                  Consumer<PedometerModel>(
+                  Consumer<PedometerProviderModel>(
                       builder: (context, pedometer, child) {
                     return Container(
                         margin: const EdgeInsets.only(top: 12),
@@ -325,7 +368,7 @@ class _OverviewPanelViewState extends State<OverviewPanelView> {
                           width: 40,
                         ));
                   }),
-                  Consumer<PedometerModel>(
+                  Consumer<PedometerProviderModel>(
                       builder: (context, pedometer, child) {
                     return Container(
                         margin: const EdgeInsets.only(left: 20, top: 10),

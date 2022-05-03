@@ -42,7 +42,7 @@ class HeartRateBloc extends Bloc<HeartRateEvent, HeartRateState> {
 
   void _mapGetMaxHeartRateMeasureToState(GetMaxHeartRateMeasure event, Emitter<HeartRateState> emit) async {
     await heartRateRepository.getMaxHeartRate().then((value) {
-      value.isNaN ? emit(const HeartRateState(heartRateStatus: HeartRateStatus.maxValueLoaded, heartRate: 0)) : emit(HeartRateState(heartRateStatus: HeartRateStatus.minValueLoaded, heartRate: value));
+      value.isNaN ? emit(const HeartRateState(heartRateStatus: HeartRateStatus.maxValueLoaded, heartRate: 0)) : emit(HeartRateState(heartRateStatus: HeartRateStatus.maxValueLoaded, heartRate: value));
     });
   }
 

@@ -8,7 +8,7 @@ class LocationState extends Equatable {
   const LocationState({this.status});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [status];
   
 }
 

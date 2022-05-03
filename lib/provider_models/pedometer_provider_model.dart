@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-class PedometerModel extends ChangeNotifier {
+class PedometerProviderModel extends ChangeNotifier {
 
   int _dailyGoal = 200;
   int _stepCount = 0;
