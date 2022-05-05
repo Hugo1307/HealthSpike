@@ -102,7 +102,7 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                                                 as GetDailyStepsEvent)
                                             .date
                                             .difference(DateTime.now())
-                                            .inDays ==
+                                            .inHours ==
                                         0,
                                 builder: (context, state) {
                                   return Text(
@@ -228,10 +228,10 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                               previous != current &&
                               current.status != null &&
                               current.status!.event is GetDailyStepsEvent &&
-                              (current.status!.event as GetDailyStepsEvent).date.difference(DateTime.now()).inDays ==-1,
+                              (current.status!.event as GetDailyStepsEvent).date.difference(DateTime.now()).inDays == -1,
                           builder: (context, state) => Text(
                             state.status != null
-                                ? ((state.status!.value.toString() is int)
+                                ? ((state.status!.value is int)
                                         ? state.status!.value.toString()
                                         : "0") +
                                     ' steps'
@@ -277,22 +277,22 @@ class _StepsPanelViewState extends State<StepsPanelView> {
                                   current.status != null &&
                                   current.status!.event is GetWeeklyStepsEvent,
                               builder: (context, state) => Text(
-                                state.status != null
-                                    ? ((state.status!.value.toString() is int)
-                                            ? state.status!.value.toString()
-                                            : '0') +
-                                        ' steps'
-                                    : '0 steps',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontFamily: HealthSpikeTheme.fontName,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15,
-                                  letterSpacing: -0.2,
-                                  color: HealthSpikeTheme.mainGreen,
-                                ),
-                              ),
-                            ),
+                                      state.status != null
+                                          ? ((state.status!.value is int)
+                                                  ? state.status!.value
+                                                      .toString()
+                                                  : '0') +
+                                              ' steps'
+                                          : '0 steps',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontFamily: HealthSpikeTheme.fontName,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 15,
+                                        letterSpacing: -0.2,
+                                        color: HealthSpikeTheme.mainGreen,
+                                      ),
+                                    )),
                             Padding(
                               padding: const EdgeInsets.only(top: 6),
                               child: Text(

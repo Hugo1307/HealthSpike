@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionHandler {
-  List<Permission> allPermissions = [Permission.activityRecognition];
+  List<Permission> allPermissions = [Permission.activityRecognition, Permission.location];
 
-  List<Permission> mandatoryPermissions = [Permission.activityRecognition];
+  List<Permission> mandatoryPermissions = [Permission.activityRecognition, Permission.location];
 
   void printPermissionCheck() {
     for (Permission permission in allPermissions) {
@@ -15,9 +15,9 @@ class PermissionHandler {
     }
   }
 
-  void checkMandatoryPermissions() {
+  Future<void> checkMandatoryPermissions() async {
     for (Permission permission in mandatoryPermissions) {
-      permission.request();
+      await permission.request();
     }
   }
 

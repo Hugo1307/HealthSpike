@@ -42,3 +42,16 @@ class GetWeeklyStepsEvent extends StepsEvent {
   List<Object?> get props => [date];
 
 }
+
+class GetDailyGoal extends StepsEvent { }
+
+class SetDailyGoal extends StepsEvent {
+
+  final int newGoal;
+
+  SetDailyGoal(this.newGoal);
+
+  @override
+  List<Object?> get props => [newGoal];
+
+}

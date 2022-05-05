@@ -25,7 +25,7 @@ class AppLocationSensor {
 
     const Distance distance = Distance();
 
-    return distance.as(LengthUnit.Kilometer, LatLng(oldLocationLatitute,oldLocationLongitude), LatLng(newLocationLatitude,newLocationLongitude));
+    return distance.as(LengthUnit.Meter, LatLng(oldLocationLatitute,oldLocationLongitude), LatLng(newLocationLatitude,newLocationLongitude));
 
   }
 
@@ -51,7 +51,8 @@ class AppLocationSensor {
         return;
       }
     }
-
+  
+    /*
     _permissionGranted = await location.hasPermission();
     if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await location.requestPermission();
@@ -59,6 +60,7 @@ class AppLocationSensor {
         return;
       }
     }
+    */
 
     location.onLocationChanged.listen((LocationData currentSensorLocation) {
       

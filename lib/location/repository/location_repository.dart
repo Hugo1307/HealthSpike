@@ -43,10 +43,10 @@ class LocationRepository {
     final PropertyQuery<double> propertyQuery = distanceQuery.property(DistanceModel_.distance);
 
     double totalDistance = propertyQuery.sum();
+    double distanceInKms = totalDistance*0.001;
 
-    completer.complete(totalDistance);
+    completer.complete(distanceInKms);
     return completer.future;
-
 
   }
 
@@ -59,8 +59,9 @@ class LocationRepository {
     final PropertyQuery<double> propertyQuery = distanceQuery.property(DistanceModel_.distance);
 
     double totalDistance = propertyQuery.sum();
+    double distanceInKms = totalDistance*0.001;
 
-    completer.complete(totalDistance);
+    completer.complete(distanceInKms);
     return completer.future;
 
   } 
@@ -74,8 +75,9 @@ class LocationRepository {
     final PropertyQuery<double> propertyQuery = distanceQuery.property(DistanceModel_.distance);
 
     double totalDistance = propertyQuery.sum();
+    double distanceInKms = totalDistance*0.001;
 
-    completer.complete(totalDistance);
+    completer.complete(distanceInKms);
     return completer.future;
 
   } 

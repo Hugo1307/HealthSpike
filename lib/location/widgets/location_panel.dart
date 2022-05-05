@@ -321,15 +321,29 @@ class _LocationPanelViewState extends State<LocationPanelView> {
                           children: <Widget>[
                             Consumer<LocationProviderModel>(
                                 builder: (context, locationModel, child) {
-                              return Text(
-                                locationModel.currentLatitude.toStringAsFixed(2) + ":" + locationModel.currentLongitude.toStringAsFixed(2),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontFamily: HealthSpikeTheme.fontName,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 11,
-                                  color: HealthSpikeTheme.nearlyBlue,
-                                ),
+                              return Column(
+                                children: [
+                                  Text(
+                                    locationModel.currentLatitude.toString(),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontFamily: HealthSpikeTheme.fontName,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11,
+                                      color: HealthSpikeTheme.nearlyBlue,
+                                    ),
+                                  ),
+                                  Text(
+                                    locationModel.currentLongitude.toString(),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontFamily: HealthSpikeTheme.fontName,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11,
+                                      color: HealthSpikeTheme.nearlyBlue,
+                                    ),
+                                  ),
+                                ],
                               );
                             }),
                             Padding(

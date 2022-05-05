@@ -103,9 +103,28 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "5:5122632326640393810",
+      "lastPropertyId": "2:4540210802391562794",
+      "name": "StepsGoal",
+      "properties": [
+        {
+          "id": "1:8943834941430507203",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4540210802391562794",
+          "name": "stepsGoal",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "4:4346055131580983872",
+  "lastEntityId": "5:5122632326640393810",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",

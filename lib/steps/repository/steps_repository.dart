@@ -2,10 +2,14 @@ import 'dart:async';
 
 import 'package:health_spike/main.dart';
 import 'package:health_spike/objectbox.g.dart';
+import 'package:health_spike/steps/model/steps_goal_model.dart';
 import 'package:health_spike/steps/model/steps_model.dart';
 
 class StepsRepository {
   final Box<Steps> stepsBox = objectBoxInstance.store.box<Steps>();
+  final Box<StepsGoal> stepsGoalBox = objectBoxInstance.store.box<StepsGoal>();
+  
+  int stepsGoalId = 0;
 
   Future<int> save(Steps steps) {
     return stepsBox.putAsync(steps);
@@ -53,14 +57,14 @@ class StepsRepository {
     final QueryBuilder<Steps> todayStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(date.subtract(const Duration(days: 1)).millisecondsSinceEpoch, date.millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
     final Query<Steps> todayStepsQuery = todayStepsQueryBuilder.build();
 
-    final QueryBuilder<Steps> oldStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(0, date.subtract(const Duration(days: 1)).millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
+    final QueryBuilder<Steps> oldStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(0, date.subtract(const Duration(days: 1, hours: 1)).millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
     final Query<Steps> oldStepsQuery = oldStepsQueryBuilder.build();
 
     Steps? highestOldRecord = oldStepsQuery.findFirst();
     Steps? todayHighestRecord = todayStepsQuery.findFirst();
 
     if (todayHighestRecord != null) {
-      if (highestOldRecord != null) {
+      if (highestOldRecord != null && todayHighestRecord.count >= highestOldRecord.count) {
         completer.complete(todayHighestRecord.count - highestOldRecord.count);
       } else {
         completer.complete(todayHighestRecord.count);
@@ -80,14 +84,14 @@ class StepsRepository {
     final QueryBuilder<Steps> weekStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(date.subtract(const Duration(days: 7)).millisecondsSinceEpoch, date.millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
     final Query<Steps> weekStepsQuery = weekStepsQueryBuilder.build();
 
-    final QueryBuilder<Steps> oldStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(0, date.subtract(const Duration(days: 7)).millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
+    final QueryBuilder<Steps> oldStepsQueryBuilder = stepsBox.query(Steps_.timestamp.between(0, date.subtract(const Duration(days: 7, hours: 1)).millisecondsSinceEpoch))..order(Steps_.timestamp, flags: Order.descending);
     final Query<Steps> oldStepsQuery = oldStepsQueryBuilder.build();
 
     Steps? highestOldRecord = oldStepsQuery.findFirst();
     Steps? weekHighestRecord = weekStepsQuery.findFirst();
 
     if (weekHighestRecord != null) {
-      if (highestOldRecord != null) {
+      if (highestOldRecord != null && weekHighestRecord.count >= highestOldRecord.count) {
         completer.complete(weekHighestRecord.count - highestOldRecord.count);
       } else {
         completer.complete(weekHighestRecord.count);
@@ -97,6 +101,26 @@ class StepsRepository {
     }
 
     return completer.future;
+
+  }
+
+  Future<int> getStepsGoal() async {
+    
+    if (stepsGoalBox.getAll().isNotEmpty) {
+      return stepsGoalBox.getAll().first.stepsGoal;
+    } else {
+      return 500;
+    }
+
+  }
+
+  Future<void> setStepsGoal(int newGoal) async {
+    
+    if (stepsGoalBox.getAll().isNotEmpty) {
+      stepsGoalBox.put(StepsGoal(id: stepsGoalBox.getAll().first.id, stepsGoal: newGoal));
+    } else {
+      stepsGoalBox.put(StepsGoal(stepsGoal: newGoal));
+    }
 
   }
 

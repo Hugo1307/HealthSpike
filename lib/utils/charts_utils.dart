@@ -41,8 +41,6 @@ class LineChart extends StatelessWidget {
                 charts.BasicNumericTickProviderSpec(zeroBound: false)),
       domainAxis: const charts.DateTimeAxisSpec(
           tickFormatterSpec: charts.AutoDateTimeTickFormatterSpec(
-        hour: charts.TimeFormatterSpec(
-            format: 'hh', transitionFormat: 'dd/MM hh:mm'),
         minute: charts.TimeFormatterSpec(
           format: 'HH:mm',
           transitionFormat: 'HH:mm',
